@@ -1,0 +1,560 @@
+
+
+
+
+Internet Engineering Task Force (IETF)                         M. Davids
+Internet-Draft                                                 SIDN Labs
+Intended status: Best Current Practice                     26 April 2025
+Expires: 28 October 2025
+
+
+Registration of the "_for-sale" Underscored and Globally Scoped DNS Node
+                                  Name
+                       draft-davids-forsalereg-06
+
+Abstract
+
+   This document defines an operational convention for using the
+   reserved DNS leaf node name "_for-sale" to indicate that the parent
+   domain name is available for purchase.  This approach offers the
+   advantage of easy deployment without affecting ongoing operations.
+   As such, the method can be applied to a domain name that is still in
+   full use.
+
+Status of This Memo
+
+   This Internet-Draft is submitted in full conformance with the
+   provisions of BCP 78 and BCP 79.
+
+   Internet-Drafts are working documents of the Internet Engineering
+   Task Force (IETF).  Note that other groups may also distribute
+   working documents as Internet-Drafts.  The list of current Internet-
+   Drafts is at https://datatracker.ietf.org/drafts/current/.
+
+   Internet-Drafts are draft documents valid for a maximum of six months
+   and may be updated, replaced, or obsoleted by other documents at any
+   time.  It is inappropriate to use Internet-Drafts as reference
+   material or to cite them other than as "work in progress."
+
+   This Internet-Draft will expire on 28 October 2025.
+
+Copyright Notice
+
+   Copyright (c) 2025 IETF Trust and the persons identified as the
+   document authors.  All rights reserved.
+
+
+
+
+
+
+
+
+
+
+
+Davids                   Expires 28 October 2025                [Page 1]
+
+Internet-Draft                 forsalereg                     April 2025
+
+
+   This document is subject to BCP 78 and the IETF Trust's Legal
+   Provisions Relating to IETF Documents (https://trustee.ietf.org/
+   license-info) in effect on the date of publication of this document.
+   Please review these documents carefully, as they describe your rights
+   and restrictions with respect to this document.  Code Components
+   extracted from this document must include Revised BSD License text as
+   described in Section 4.e of the Trust Legal Provisions and are
+   provided without warranty as described in the Revised BSD License.
+
+Table of Contents
+
+   1.  Introduction  . . . . . . . . . . . . . . . . . . . . . . . .   2
+     1.1.  Terminology . . . . . . . . . . . . . . . . . . . . . . .   3
+   2.  Rationale . . . . . . . . . . . . . . . . . . . . . . . . . .   3
+   3.  Conventions . . . . . . . . . . . . . . . . . . . . . . . . .   3
+     3.1.  General Record Format . . . . . . . . . . . . . . . . . .   3
+     3.2.  Content limitations . . . . . . . . . . . . . . . . . . .   4
+     3.3.  RRset limitations . . . . . . . . . . . . . . . . . . . .   5
+     3.4.  RR Type limitations . . . . . . . . . . . . . . . . . . .   5
+     3.5.  TTL limitation  . . . . . . . . . . . . . . . . . . . . .   5
+     3.6.  Wildcard limitation . . . . . . . . . . . . . . . . . . .   5
+     3.7.  CNAME limitation  . . . . . . . . . . . . . . . . . . . .   5
+     3.8.  Placement of leaf node name . . . . . . . . . . . . . . .   5
+   4.  Examples  . . . . . . . . . . . . . . . . . . . . . . . . . .   6
+     4.1.  Example 1: A URI  . . . . . . . . . . . . . . . . . . . .   6
+     4.2.  Example 2: Various other approaches . . . . . . . . . . .   7
+   5.  Operational Guidelines  . . . . . . . . . . . . . . . . . . .   7
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
+   7.  Privacy Considerations  . . . . . . . . . . . . . . . . . . .   8
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .   8
+   9.  Implementation Status . . . . . . . . . . . . . . . . . . . .   9
+   10. Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   9
+   11. References  . . . . . . . . . . . . . . . . . . . . . . . . .   9
+     11.1.  Normative References . . . . . . . . . . . . . . . . . .   9
+     11.2.  Informative References . . . . . . . . . . . . . . . . .   9
+   Author's Address  . . . . . . . . . . . . . . . . . . . . . . . .  10
+
+1.  Introduction
+
+   Well-established services [RFC3912][RFC9083] exist to determine
+   whether a domain name is registered.  However, the fact that a domain
+   name exists does not necessarily mean it is unavailable; it may still
+   be for sale.
+
+
+
+
+
+
+
+
+Davids                   Expires 28 October 2025                [Page 2]
+
+Internet-Draft                 forsalereg                     April 2025
+
+
+   Some registrars and other entities offer mediation services between
+   domain name holders and interested parties.  For domain names that
+   are not for sale, such services may be of limited value, whereas they
+   may be beneficial for domain names that are clearly being offered for
+   sale.
+
+   This specification defines a lightweight and universal method to
+   ascertain whether a domain name, although registered, is available
+   for purchase.  It enables a domain name holder to add a reserved
+   underscored leaf node name [RFC8552] in the zone, indicating that the
+   domain name is for sale.
+
+   The TXT RR type [RFC1035] created for this purpose MUST follow the
+   formal definition of Section 3.1.  Its content MAY contain a pointer,
+   such as a Uniform Resource Identifier (URI) [RFC8820], or another
+   string, allowing interested parties to obtain information or contact
+   the domain name holder for further negotiations.
+
+   With due caution, such information can also be incorporated into
+   automated availability services.  When checking a domain name for
+   availability, the service may indicate whether it is for sale and
+   provide a pointer to the seller's information.
+
+1.1.  Terminology
+
+   The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+   "SHOULD", "SHOULD NOT", "RECOMMENDED", "NOT RECOMMENDED", "MAY", and
+   "OPTIONAL" in this document are to be interpreted as described in BCP
+   14 [RFC2119] [RFC8174] when, and only when, they appear in all
+   capitals, as shown here.
+
+2.  Rationale
+
+   There are undoubtedly more ways to address this problem space.  The
+   reasons for the approach defined in this document are primarily
+   accessibility and simplicity.  The indicator can be easily turned on
+   and off at will and moreover, it is immediately deployable and does
+   not require significant changes in existing services.  This allows
+   for a smooth introduction of the concept.
+
+3.  Conventions
+
+3.1.  General Record Format
+
+   The "_for-sale" TXT record MUST start with a version tag, possibly
+   followed by a string.
+
+
+
+
+
+Davids                   Expires 28 October 2025                [Page 3]
+
+Internet-Draft                 forsalereg                     April 2025
+
+
+   The formal definition of the record format, using ABNF
+   [RFC5234][RFC7405], is as follows:
+
+   forsale-record  = forsale-version forsale-content
+   forsale-version = %s"v=FORSALE1;"
+                     ; version tag, case sensitive, no spaces
+   forsale-content = 0*244OCTET
+                     ; referred to as content or data
+
+   Records without a version tag MUST NOT be interpreted or processed as
+   a valid '_for-sale' indicator.  However, they may still offer some
+   additional information for humans when considered alongside a valid
+   record, for example:
+
+   _for-sale.example.com. IN TXT "I am for sale"
+   _for-sale.example.com. IN TXT "v=FORSALE1;fscode=NGYyYjEyZWY"
+
+   If no TXT records at a leaf node contain a version tag, processors
+   MUST consider the node name invalid and discard it.
+
+3.2.  Content limitations
+
+   The TXT [RFC8553] (Section 2.1) record MUST contain any valid
+   content, ranging from an empty string to meaningful text or URIs.
+   Any text that suggests that the domain is not for sale is invalid
+   content.  If a domain name is not for sale, a "_for-sale" indicator
+   is pointless and any existence of a valid "_for-sale" TXT record MAY
+   therefore be regarded as an indication that the domain name is for
+   sale.
+
+   This specification does not dictate the exact use of any content in
+   the "_for-sale" TXT record, or the lack of any such content.  Parties
+   - such as registries and registrars - MAY use it in their tools,
+   perhaps even by defining specific requirements that the content must
+   meet.  Content can also be represented in a human-readable format for
+   individuals to interpret.  See the Examples section for
+   clarification.
+
+   Since the content of TXT record has no defined meaning, it is up to
+   the processor of the content to decide how to handle it.
+
+   See Section 5 for additional guidelines.
+
+
+
+
+
+
+
+
+
+Davids                   Expires 28 October 2025                [Page 4]
+
+Internet-Draft                 forsalereg                     April 2025
+
+
+3.3.  RRset limitations
+
+   This specification does not define any restrictions on the number of
+   TXT records in the RRset, but limiting it to one is RECOMMENDED.  It
+   is also RECOMMENDED that the length of the RDATA [RFC9499] per TXT
+   record does not exceed 255 octets.  If this is not the case, the
+   processor SHOULD determine which content to use.
+
+   For example, a registry might select content that includes a
+   recognizable code, which can be used to direct visitors to a sales
+   page as part of its services, whereas an individual might simply
+   extract a phone number (if present) and use it to contact a potential
+   seller.
+
+3.4.  RR Type limitations
+
+   Adding any resource record (RR) types under the "_for-sale" leaf
+   other than TXT is NOT RECOMMENDED.  Such records MUST be ignored for
+   the purposes of this document.
+
+3.5.  TTL limitation
+
+   A TTL longer than 86400 is NOT RECOMMENDED.  Long TTLs increase the
+   risk of outdated information persisting, potentially misleading
+   buyers into believing the domain is still available for purchase.
+
+3.6.  Wildcard limitation
+
+   The "_for-sale" leaf node name SHOULD NOT be a wildcard, but
+   processors MAY still analyze it if it is.
+
+3.7.  CNAME limitation
+
+   The "_for-sale" leaf node name MAY be an alias, but if that is the
+   case, the CNAME record it is associated with it SHOULD also be named
+   "_for-sale", for example:
+
+   _for-sale.example.com. IN CNAME _for-sale.example.org.
+
+   However, processors MAY follow the CNAME pointers in other cases as
+   well.
+
+3.8.  Placement of leaf node name
+
+   The "_for-sale" leaf node name MAY be placed on the top level domain,
+   or any domain directly below, with the exception of the .arpa
+   infrastructure top-level domain.
+
+
+
+
+Davids                   Expires 28 October 2025                [Page 5]
+
+Internet-Draft                 forsalereg                     April 2025
+
+
+   It MAY also be placed at a lower level, but only when that level is
+   mentioned in the Public Suffix List [PSL].
+
+   Any other placement of the record MUST NOT be regarded as a signal
+   that the domain above it is for sale.
+
+   Table 1 provides further clarification.
+
+     +===============================+====================+==========+
+     | Name                          | Situation          | Verdict  |
+     +===============================+====================+==========+
+     | _for-sale.example             | root zone          | For sale |
+     +-------------------------------+--------------------+----------+
+     | _for-sale.aaa.example         | Second level       | For sale |
+     +-------------------------------+--------------------+----------+
+     | _for-sale.acme.bbb.example    | bbb.example in PSL | For sale |
+     +-------------------------------+--------------------+----------+
+     | _for-sale.www.ccc.example     | Other              | Invalid  |
+     +-------------------------------+--------------------+----------+
+     | _for-sale.51.198.in-addr.arpa | infrastructure TLD | Invalid  |
+     +-------------------------------+--------------------+----------+
+
+                 Table 1: Allowed placements of TXT record
+
+4.  Examples
+
+4.1.  Example 1: A URI
+
+   The holder of 'example.com' wishes to signal that the domain is for
+   sale and adds this record to the 'example.com' zone:
+
+   _for-sale.example.com. IN TXT "v=FORSALE1;https://buy.example.com/"
+
+   An interested party notices this signal and can visit the URI
+   mentioned for further information.  The TXT record may also be
+   processed by automated tools, but see the Security Considerations
+   section for possible risks.
+
+   As an alternative, a mailto: URI could also be used:
+
+   _for-sale.example.com. IN TXT "v=FORSALE1;mailto:owner@example.com"
+
+   Or a telephone URI:
+
+   _for-sale.example.com. IN TXT "v=FORSALE1;tel:+1-201-555-0123"
+
+
+
+
+
+
+Davids                   Expires 28 October 2025                [Page 6]
+
+Internet-Draft                 forsalereg                     April 2025
+
+
+   There can be a use case for these URIs, especially since WHOIS (or
+   RDAP) often has privacy restrictions.  But see the Privacy
+   Considerations section for possible downsides.
+
+4.2.  Example 2: Various other approaches
+
+   Free format text, with some additional unstructured information,
+   aimed at being human-readable:
+
+   _for-sale.example.com. IN TXT "v=FORSALE1;$500, info[at]example.com"
+
+   A proprietary format, defined by a registry or registrar to
+   automatically redirect visitors to a web page, but without a clearly
+   defined meaning to third parties:
+
+   _for-sale.example.com. IN TXT "v=FORSALE1;fscode=aHR0cHM...wbGUuY29t"
+
+   The content in the following example could be malicious, but it is
+   not in violation of this specification (see Section 8):
+
+   _for-sale.example.com. IN TXT "v=FORSALE1;<script>alert('')</script>"
+
+5.  Operational Guidelines
+
+   DNS wildcards interact poorly with underscored names.  Therefore, the
+   use of wildcards is NOT RECOMMENDED when deploying this mechanism.
+   However, wildcards may still be encountered in practice, especially
+   with operators who are not implementing this mechanism.  This is why
+   the version tag is a REQUIRED element: it helps distinguish valid
+   "_for-sale" records from unrelated TXT records.  Nonetheless, any
+   assumptions about the content of "_for-sale" TXT records SHOULD be
+   made with caution.
+
+   It is also RECOMMENDED that the content string be limited to visible
+   ASCII characters, excluding the double quote (") and backslash (\).
+
+   In ABNF syntax, this would be:
+
+   forsale-content     = 0*244recommended-char
+   recommended-char    = %x20-21 / %x23-5B / %x5D-7E
+
+6.  IANA Considerations
+
+   IANA has established the "Underscored and Globally Scoped DNS Node
+   Names" registry [RFC8552][IANA].  The underscored leaf node name
+   defined in this specification should be added as follows:
+
+
+
+
+
+Davids                   Expires 28 October 2025                [Page 7]
+
+Internet-Draft                 forsalereg                     April 2025
+
+
+                   +=========+============+===========+
+                   | RR Type | _NODE NAME | Reference |
+                   +=========+============+===========+
+                   | TXT     | _for-sale  | TBD       |
+                   +---------+------------+-----------+
+
+                          Table 2: Entry for the
+                     "Underscored and Globally Scoped
+                         DNS Node Names" registry
+
+   This specification does not require the creation of an IANA registry
+   for record fields.
+
+   <NOTE TO RFC EDITOR: Adjust the text in this section before
+   publication.>
+
+7.  Privacy Considerations
+
+   The use of the "_for-sale" leaf node name publicly indicates the
+   intent to sell a domain name.  Domain owners should be aware that
+   this information is accessible to anyone querying the DNS and may
+   have privacy implications.
+
+   There is a risk of data scraping, such as email addresses and phone
+   numbers.
+
+8.  Security Considerations
+
+   One use of the TXT record type defined in this document is to parse
+   the content it contains and to automatically publish certain
+   information from it on a website or elsewhere.  However, there is a
+   risk if the domain name holder publishes a malicious URI or one that
+   points to improper content.  This may result in reputational damage
+   for the party parsing the record.
+
+   An even more serious scenario occurs when the content of the TXT
+   record is not validated and sanitized sufficiently, opening doors to
+   - for example - XSS attacks among other things.
+
+   Therefore, it is RECOMMENDED that any parsing and publishing is
+   conducted with the utmost care.
+
+   There is also a risk that this method will be abused as a marketing
+   tool, or to lure individuals into visiting certain sites or making
+   contact by other means, without there being any intention to actually
+   sell the particular domain name.  Therefore, this method is best
+   suited for use by professionals.
+
+
+
+
+Davids                   Expires 28 October 2025                [Page 8]
+
+Internet-Draft                 forsalereg                     April 2025
+
+
+9.  Implementation Status
+
+   The concept described in this document is in use with the .nl ccTLD
+   registry.  See for example:
+
+   https://www.sidn.nl/en/whois?q=example.nl
+
+   <NOTE TO RFC EDITOR: Please remove this section before publication.>
+
+10.  Acknowledgements
+
+   The author would like to thank Thijs van den Hout, Caspar Schutijser,
+   Melvin Elderman, Paul Bakker and Ben van Hartingsveldt for their
+   valuable feedback.
+
+11.  References
+
+11.1.  Normative References
+
+   [RFC1035]  Mockapetris, P., "Domain names - implementation and
+              specification", STD 13, RFC 1035, DOI 10.17487/RFC1035,
+              November 1987, <https://www.rfc-editor.org/info/rfc1035>.
+
+   [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
+              Requirement Levels", BCP 14, RFC 2119,
+              DOI 10.17487/RFC2119, March 1997,
+              <https://www.rfc-editor.org/info/rfc2119>.
+
+   [RFC5234]  Crocker, D., Ed. and P. Overell, "Augmented BNF for Syntax
+              Specifications: ABNF", STD 68, RFC 5234,
+              DOI 10.17487/RFC5234, January 2008,
+              <https://www.rfc-editor.org/info/rfc5234>.
+
+   [RFC7405]  Kyzivat, P., "Case-Sensitive String Support in ABNF",
+              RFC 7405, DOI 10.17487/RFC7405, December 2014,
+              <https://www.rfc-editor.org/info/rfc7405>.
+
+   [RFC8174]  Leiba, B., "Ambiguity of Uppercase vs Lowercase in RFC
+              2119 Key Words", BCP 14, RFC 8174, DOI 10.17487/RFC8174,
+              May 2017, <https://www.rfc-editor.org/info/rfc8174>.
+
+   [RFC8552]  Crocker, D., "Scoped Interpretation of DNS Resource
+              Records through "Underscored" Naming of Attribute Leaves",
+              BCP 222, RFC 8552, DOI 10.17487/RFC8552, March 2019,
+              <https://www.rfc-editor.org/info/rfc8552>.
+
+11.2.  Informative References
+
+
+
+
+Davids                   Expires 28 October 2025                [Page 9]
+
+Internet-Draft                 forsalereg                     April 2025
+
+
+   [IANA]     IANA, "Underscored and Globally Scoped DNS Node Names",
+              <https://www.iana.org/assignments/dns-parameters/dns-
+              parameters.xml#underscored-globally-scoped-dns-node-
+              names>.
+
+   [PSL]      Mozilla Foundation, "Public Suffix List",
+              <https://publicsuffix.org/>.
+
+   [RFC3912]  Daigle, L., "WHOIS Protocol Specification", RFC 3912,
+              DOI 10.17487/RFC3912, September 2004,
+              <https://www.rfc-editor.org/info/rfc3912>.
+
+   [RFC8553]  Crocker, D., "DNS Attrleaf Changes: Fixing Specifications
+              That Use Underscored Node Names", BCP 222, RFC 8553,
+              DOI 10.17487/RFC8553, March 2019,
+              <https://www.rfc-editor.org/info/rfc8553>.
+
+   [RFC8820]  Nottingham, M., "URI Design and Ownership", BCP 190,
+              RFC 8820, DOI 10.17487/RFC8820, June 2020,
+              <https://www.rfc-editor.org/info/rfc8820>.
+
+   [RFC9083]  Hollenbeck, S. and A. Newton, "JSON Responses for the
+              Registration Data Access Protocol (RDAP)", STD 95,
+              RFC 9083, DOI 10.17487/RFC9083, June 2021,
+              <https://www.rfc-editor.org/info/rfc9083>.
+
+   [RFC9499]  Hoffman, P. and K. Fujiwara, "DNS Terminology", BCP 219,
+              RFC 9499, DOI 10.17487/RFC9499, March 2024,
+              <https://www.rfc-editor.org/info/rfc9499>.
+
+Author's Address
+
+   Marco Davids
+   SIDN Labs
+   Meander 501
+   6825 MD Arnhem
+   Netherlands
+   Phone: +31 26 352 5500
+   Email: marco.davids@sidn.nl
+
+
+
+
+
+
+
+
+
+
+
+
+Davids                   Expires 28 October 2025               [Page 10]
