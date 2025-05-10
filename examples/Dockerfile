@@ -14,7 +14,7 @@ COPY pyproject.toml ./
 RUN poetry config virtualenvs.create false
 
 # Install dependencies
-RUN poetry install
+RUN poetry install --no-root
 
 # Copy the rest of the application
 COPY domainsale/ ./domainsale/
